@@ -2,245 +2,541 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ruleta Viernes de Feria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ruleta Viernes de Feria - Caseta El Resucitado</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-      color: #fff;
+    html, body {
+      width: 100%;
       min-height: 100vh;
+      background: radial-gradient(circle, #2e1065 0%, #0f051d 100%);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: 16px;
+      align-items: center;
+      padding: 10px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 18px 14px;
+      max-width: 380px;
+      width: 100%;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    h1 { font-size: 1.8rem; margin-bottom: 6px; color: #f5af19; }
-    p.sub { font-size: 0.95rem; opacity: 0.85; margin-bottom: 18px; }
-
-    .ruleta-box {
+    .logo-header {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 8px;
+      display: block;
+      cursor: pointer;
+      border: 2px solid #ffd700;
+      -webkit-tap-highlight-color: transparent;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #ffd700;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    .dia-tag {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(168,85,247,0.3);
+    }
+    .wheel-container {
       position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 0 auto 20px auto;
+      width: 270px;
+      height: 270px;
+      margin: 8px auto 12px;
     }
-    .indicador {
+    #wheel {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .pointer {
       position: absolute;
-      top: -12px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 24px solid #ff2e63;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 22px solid #ff3b30;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
       z-index: 10;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
     }
-    canvas {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 10px rgba(245, 175, 25, 0.3);
-      transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
-    }
-    button.btn-girar {
-      background: linear-gradient(45deg, #f5af19, #e17055);
+    .btn {
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      color: #111;
+      font-weight: 800;
       border: none;
-      color: #fff;
-      font-weight: bold;
-      font-size: 1.15rem;
-      padding: 14px 34px;
-      border-radius: 50px;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 1.05rem;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4);
-      transition: transform 0.1s, opacity 0.2s;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(234,179,8,0.4);
     }
-    button.btn-girar:active { transform: scale(0.96); }
-    button.btn-girar:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-    .mensaje {
-      margin-top: 18px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      min-height: 28px;
-      max-width: 340px;
+    /* CAJA DE PREMIO Y BOTÓN DESLIZADOR */
+    .premio-box {
+      display: none;
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid #22c55e;
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 12px;
     }
-    .admin-link {
-      margin-top: 25px;
+    .premio-titulo {
+      font-size: 1.15rem;
+      color: #4ade80;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .premio-sub {
       font-size: 0.8rem;
-      color: #666;
+      color: #e5e7eb;
+      margin-bottom: 10px;
+    }
+    .slider-track {
+      position: relative;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid #22c55e;
+      border-radius: 35px;
+      height: 50px;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .slider-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #86efac;
+      letter-spacing: 0.4px;
+      pointer-events: none;
+    }
+    .slider-handle {
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      bottom: 3px;
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .slider-handle span {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    #resultado {
+      margin-top: 10px;
+      min-height: 20px;
+    }
+
+    /* AVISO INTEGRADO ELEGANTE */
+    .banner-aviso {
+      display: none;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    .admin-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+    .admin-content {
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+    }
+    .admin-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
       cursor: pointer;
-      text-decoration: underline;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
-  <h1>🎪 VIERNES DE FERIA 🎪</h1>
-  <p class="sub">¡Prueba tu suerte y llévate tu premio!</p>
+<div class="card">
+  <img src="IMG_5861.jpg" alt="Caseta El Resucitado" class="logo-header" id="adminTrigger" onerror="this.style.display='none'">
+  <h1>RULETA EL RESUCITADO</h1>
+  <div class="dia-tag">VIERNES DE FERIA</div>
+  <p style="font-size: 0.85rem; color: #ddd; margin-bottom: 8px;">¡Gira y prueba tu suerte en la barra!</p>
 
-  <div class="ruleta-box">
-    <div class="indicador"></div>
-    <canvas id="canvasRuleta" width="600" height="600"></canvas>
+  <div class="wheel-container">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="540" height="540"></canvas>
   </div>
 
-  <button id="btnGirar" class="btn-girar" onclick="tirar()">GIRAR RULETA</button>
+  <button class="btn" id="spinBtn" onclick="girarRuleta()">¡PROBAR SUERTE!</button>
 
-  <div id="mensaje" class="mensaje"></div>
-  <div class="admin-link" onclick="solicitarAdmin()">Acceso barra</div>
+  <!-- BANNER PARA MENSAJES DE ERROR/HORARIO/IP DENTRO DEL DISEÑO -->
+  <div class="banner-aviso" id="bannerAviso"></div>
 
-  <script>
-    // ================= CONFIGURACIÓN =================
-    const PIN_ADMIN = "2024"; 
-    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzVWPfeAikKEhbmrFKHZ6M82F7VLkW6jvtQe9vuVL_cMNemcoIWkqIqBHhM0tJHttUc/exec";
-    // =================================================
+  <div class="premio-box" id="premioBox">
+    <div class="premio-titulo" id="premioTitulo">🎉 ¡PREMIO!</div>
+    <div class="premio-sub">Muestra este ticket al camarero para que lo valide deslizando:</div>
+    <div class="slider-track" id="sliderTrack">
+      <div class="slider-text" id="sliderText">Desliza para canjear ➔</div>
+      <div class="slider-handle" id="sliderHandle"><span>➔</span></div>
+    </div>
+  </div>
 
-    let esModoAdmin = false;
-    let girando = false;
-    let rotacionActual = 0;
+  <div id="resultado"></div>
 
-    // 8 sectores (45° por casilla)
-    const sectores = [
-      { type: "chupito", label: "Chupito", color: "#e67e22" },
-      { type: "nada", label: "Suerte", color: "#34495e" },
-      { type: "dto_rebujito", label: "-1.50€ Rebuj.", color: "#16a085" },
-      { type: "cubata_gratis", label: "Cubata Gratis", color: "#9b59b6" },
-      { type: "nada", label: "Suerte", color: "#2c3e50" },
-      { type: "dto_cubata", label: "-2.00€ Cubata", color: "#2980b9" },
-      { type: "chupito", label: "Chupito", color: "#d35400" },
-      { type: "nada", label: "Suerte", color: "#34495e" }
-    ];
+  <footer style="margin-top: 14px; font-size: 0.72rem; color: rgba(255,255,255,0.4);">
+    Desarrollado por <strong style="color: rgba(255,215,0,0.65);">Esperanza Moreno</strong>
+  </footer>
+</div>
 
-    const canvas = document.getElementById("canvasRuleta");
-    const ctx = canvas.getContext("2d");
+<div class="admin-modal" id="adminModal">
+  <div class="admin-content">
+    <h3 style="color:#ffd700; margin-bottom:12px;">🛡️ Panel Administrador</h3>
+    <button class="admin-btn" onclick="activarPremioForzado()">🎁 Forzar Premio Siguiente Tirada</button>
+    <button class="admin-btn" style="background:#4b5563;" onclick="cerrarAdmin()">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVWPfeAikKEhbmrFKHZ6M82F7VLkW6jvtQe9vuVL_cMNemcoIWkqIqBHhM0tJHttUc/exec";
+  const PIN_ADMIN = "3311";
+
+  const sectores = [
+    { text: "SUERTE", color: "#1e1e24", type: "nada" },
+    { text: "1 CHUPITO", color: "#7c3aed", type: "chupito" },
+    { text: "SUERTE", color: "#1e1e24", type: "nada" },
+    { text: "-2€ CUBATA", color: "#2563eb", type: "dto_cubata" },
+    { text: "SUERTE", color: "#1e1e24", type: "nada" },
+    { text: "CUBATA GRATIS", color: "#ca8a04", type: "cubata_gratis" },
+    { text: "SUERTE", color: "#1e1e24", type: "nada" },
+    { text: "-1,50€ REBUJITO", color: "#059669", type: "dto_rebujito" }
+  ];
+
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const spinBtn = document.getElementById("spinBtn");
+  const resDiv = document.getElementById("resultado");
+  const premioBox = document.getElementById("premioBox");
+  const premioTitulo = document.getElementById("premioTitulo");
+  const bannerAviso = document.getElementById("bannerAviso");
+
+  let currentAngle = 0;
+  let girando = false;
+
+  function dibujarRuleta() {
     const numSectores = sectores.length;
-    const anguloPorSector = (2 * Math.PI) / numSectores;
+    const arc = (2 * Math.PI) / numSectores;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = cx - 14;
 
-    function dibujarRuleta() {
-      const centro = canvas.width / 2;
-      const radio = centro - 10;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (let i = 0; i < numSectores; i++) {
-        const anguloInicio = i * anguloPorSector;
-        const anguloFin = anguloInicio + anguloPorSector;
+    sectores.forEach((sec, i) => {
+      const angle = currentAngle + (i * arc);
+      ctx.beginPath();
+      ctx.fillStyle = sec.color;
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, angle, angle + arc);
+      ctx.fill();
+      ctx.stroke();
 
-        ctx.beginPath();
-        ctx.fillStyle = sectores[i].color;
-        ctx.moveTo(centro, centro);
-        ctx.arc(centro, centro, radio, anguloInicio, anguloFin);
-        ctx.lineTo(centro, centro);
-        ctx.fill();
-        ctx.stroke();
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle + arc / 2);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 20px sans-serif";
+      ctx.fillText(sec.text, radius - 20, 7);
+      ctx.restore();
+    });
+  }
+  dibujarRuleta();
 
-        ctx.save();
-        ctx.translate(centro, centro);
-        ctx.rotate(anguloInicio + anguloPorSector / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 26px sans-serif";
-        ctx.fillText(sectores[i].label, radio - 20, 10);
-        ctx.restore();
+  function mostrarAviso(mensaje, esExito = false) {
+    bannerAviso.innerHTML = mensaje;
+    bannerAviso.style.display = "block";
+    if (esExito) {
+      bannerAviso.style.background = "rgba(34, 197, 94, 0.2)";
+      bannerAviso.style.borderColor = "#22c55e";
+      bannerAviso.style.color = "#86efac";
+    } else {
+      bannerAviso.style.background = "rgba(239, 68, 68, 0.2)";
+      bannerAviso.style.borderColor = "#ef4444";
+      bannerAviso.style.color = "#fca5a5";
+    }
+  }
+
+  // Comprobación instantánea con localStorage (60 minutos = 3600000 ms)
+  function verificarBloqueoLocal() {
+    const ultimaTirada = localStorage.getItem("ultima_tirada_feria");
+    if (ultimaTirada) {
+      const tiempoTranscurrido = Date.now() - parseInt(ultimaTirada, 10);
+      if (tiempoTranscurrido < 3600000) {
+        const minRestantes = Math.ceil((3600000 - tiempoTranscurrido) / 60000);
+        spinBtn.disabled = true;
+        spinBtn.textContent = "YA HAS JUGADO";
+        mostrarAviso(`⏳ Ya has tirado desde este móvil. Espera ${minRestantes} min para volver a jugar.`);
+        return true;
       }
     }
-    dibujarRuleta();
+    return false;
+  }
 
-    // Bloqueo local en el navegador
-    if (localStorage.getItem("feria_jugado_viernes") === "true") {
-      document.getElementById("btnGirar").disabled = true;
-      document.getElementById("mensaje").innerHTML = "Ya has participado hoy en el Viernes de Feria 🎪";
+  // Ejecución inmediata al cargar la página
+  verificarBloqueoLocal();
+
+  async function girarRuleta() {
+    if (girando) return;
+
+    // Validación rápida local para no hacer peticiones si ya tiró
+    const esAdminCheck = localStorage.getItem("admin_forzar_premio") === "true";
+    if (!esAdminCheck && verificarBloqueoLocal()) {
+      return;
     }
 
-    function solicitarAdmin() {
-      const pin = prompt("Introduce el PIN de acceso:");
-      if (pin === PIN_ADMIN) {
-        esModoAdmin = true;
-        alert("Modo barra activado para la próxima tirada.");
-      } else if (pin !== null) {
-        alert("PIN incorrecto.");
+    girando = true;
+    spinBtn.disabled = true;
+    premioBox.style.display = "none";
+    bannerAviso.style.display = "none";
+    resDiv.innerHTML = "<p style='color:#ffd700; font-size:0.9rem;'>Validando conexión...</p>";
+
+    let userIp = "";
+    try {
+      const resIp = await fetch("https://api.ipify.org?format=json");
+      const dataIp = await resIp.json();
+      userIp = dataIp.ip || "";
+    } catch(e) {}
+
+    const forzar = localStorage.getItem("admin_forzar_premio") === "true";
+    localStorage.removeItem("admin_forzar_premio");
+
+    let targetType = "nada";
+    let nombrePremio = "NO PREMIO";
+
+    try {
+      const endpoint = `${GOOGLE_SCRIPT_URL}?ip=${encodeURIComponent(userIp)}&admin=${forzar}`;
+      const response = await fetch(endpoint, { method: "GET", mode: "cors", redirect: "follow" });
+      const data = await response.json();
+
+      if (data.status !== "OK") {
+        resDiv.innerHTML = "";
+        mostrarAviso(data.mensaje);
+        spinBtn.disabled = true;
+        spinBtn.textContent = "BLOQUEADO";
+        girando = false;
+        return;
       }
+
+      targetType = data.targetType;
+      nombrePremio = data.nombrePremio;
+    } catch(err) {
+      mostrarAviso("⚠️ Error de conexión con el servidor. Inténtalo de nuevo.");
+      spinBtn.disabled = false;
+      girando = false;
+      resDiv.innerHTML = "";
+      return;
     }
 
-    async function tirar() {
-      if (girando) return;
+    resDiv.innerHTML = "";
 
-      const btn = document.getElementById("btnGirar");
-      const msg = document.getElementById("mensaje");
-      btn.disabled = true;
-      msg.innerHTML = "Consultando tirada...";
+    const sectoresValidos = [];
+    sectores.forEach((sec, idx) => {
+      if (sec.type === targetType) sectoresValidos.push(idx);
+    });
+    const elegidoIdx = sectoresValidos[Math.floor(Math.random() * sectoresValidos.length)] || 0;
 
-      let ipUsuario = "Desconocida";
-      try {
-        const resIp = await fetch("https://api.ipify.org?format=json");
-        const dataIp = await resIp.json();
-        ipUsuario = dataIp.ip;
-      } catch (e) {}
+    const arc = (2 * Math.PI) / sectores.length;
+    const vueltas = 5 * 2 * Math.PI;
+    const anguloDestino = (3 * Math.PI / 2) - (elegidoIdx * arc) - (arc / 2);
+    const anguloFinal = currentAngle + vueltas + ((anguloDestino - (currentAngle % (2 * Math.PI)) + 4 * Math.PI) % (2 * Math.PI));
 
-      try {
-        const res = await fetch(`${URL_SCRIPT}?ip=${encodeURIComponent(ipUsuario)}&admin=${esModoAdmin}`);
-        const data = await res.json();
+    const inicio = performance.now();
+    const duracion = 4500;
+    const anguloInicial = currentAngle;
 
-        if (data.status === "CADUCADO" || data.status === "BLOQUEADO") {
-          msg.innerHTML = data.mensaje;
-          return;
+    function animar(ahora) {
+      const transcurrido = ahora - inicio;
+      const progreso = Math.min(transcurrido / duracion, 1);
+      const easeOut = 1 - Math.pow(1 - progreso, 3);
+      currentAngle = anguloInicial + (anguloFinal - anguloInicial) * easeOut;
+      dibujarRuleta();
+
+      if (progreso < 1) {
+        requestAnimationFrame(animar);
+      } else {
+        girando = false;
+        // Registro local para bloquear tiradas inmediatas al refrescar
+        if (!forzar) {
+          localStorage.setItem("ultima_tirada_feria", Date.now().toString());
         }
 
-        if (data.status !== "OK") {
-          msg.innerHTML = "Ha ocurrido un error. Inténtalo de nuevo.";
-          btn.disabled = false;
-          return;
+        if (targetType === "nada") {
+          resDiv.innerHTML = "<p style='color:#ddd; font-weight:bold;'>¡No hubo suerte! Gracias por participar.</p>";
+          spinBtn.disabled = true;
+          spinBtn.textContent = "TIRADA REALIZADA";
+        } else {
+          spinBtn.style.display = "none";
+          premioTitulo.textContent = `🎉 ¡${nombrePremio.toUpperCase()}!`;
+          premioBox.style.display = "block";
+          reiniciarDeslizador();
         }
-
-        girando = true;
-        msg.innerHTML = "¡Girando!";
-
-        // Buscar sectores que coincidan con el resultado del servidor
-        let indicesValidos = [];
-        sectores.forEach((sec, idx) => {
-          if (sec.type === data.targetType) indicesValidos.push(idx);
-        });
-
-        if (indicesValidos.length === 0) indicesValidos = [1];
-        const indiceElegido = indicesValidos[Math.floor(Math.random() * indicesValidos.length)];
-
-        // Alineación con la flecha superior (270°)
-        const degPorSector = 360 / numSectores;
-        const anguloCentro = (indiceElegido * degPorSector) + (degPorSector / 2);
-        const anguloDestino = (270 - anguloCentro + 360) % 360;
-
-        // Vueltas completas
-        const vueltas = 360 * 5;
-        const offsetActual = rotacionActual % 360;
-        let diff = (anguloDestino - offsetActual);
-        if (diff < 0) diff += 360;
-
-        rotacionActual += vueltas + diff;
-        canvas.style.transform = `rotate(${rotacionActual}deg)`;
-
-        setTimeout(() => {
-          girando = false;
-          if (data.targetType === "nada") {
-            msg.innerHTML = "¡Vaya! Esta vez no ha habido suerte 🍀";
-          } else {
-            msg.innerHTML = `🎉 ¡PREMIO! <strong>${data.nombrePremio}</strong>`;
-          }
-
-          if (!esModoAdmin) {
-            localStorage.setItem("feria_jugado_viernes", "true");
-          } else {
-            esModoAdmin = false;
-            btn.disabled = false;
-          }
-        }, 4000);
-
-      } catch (err) {
-        msg.innerHTML = "Error de conexión con la caseta.";
-        btn.disabled = false;
       }
     }
-  </script>
+    requestAnimationFrame(animar);
+  }
+
+  // DESLIZADOR TÁCTIL PARA CANJEAR
+  const sliderTrack = document.getElementById("sliderTrack");
+  const sliderHandle = document.getElementById("sliderHandle");
+  const sliderText = document.getElementById("sliderText");
+  let isDragging = false;
+  let startX = 0;
+  let canjeado = false;
+
+  function reiniciarDeslizador() {
+    canjeado = false;
+    sliderTrack.style.pointerEvents = "auto";
+    sliderTrack.style.background = "rgba(0, 0, 0, 0.5)";
+    sliderText.textContent = "Desliza para canjear ➔";
+    sliderHandle.style.transform = "translateX(0px)";
+  }
+
+  function startDrag(e) {
+    if (canjeado) return;
+    isDragging = true;
+    startX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+    sliderHandle.style.transition = "none";
+  }
+
+  function onDrag(e) {
+    if (!isDragging || canjeado) return;
+    const clientX = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+    const maxDelta = sliderTrack.clientWidth - sliderHandle.clientWidth - 6;
+    let delta = clientX - startX;
+    if (delta < 0) delta = 0;
+    if (delta > maxDelta) delta = maxDelta;
+
+    sliderHandle.style.transform = `translateX(${delta}px)`;
+
+    if (delta >= maxDelta * 0.90) {
+      isDragging = false;
+      canjeado = true;
+      sliderHandle.style.transform = `translateX(${maxDelta}px)`;
+      sliderText.textContent = "✔ PREMIO CANJEADO";
+      sliderTrack.style.background = "#15803d";
+      sliderTrack.style.pointerEvents = "none";
+      mostrarAviso("✅ Premio validado y canjeado en la barra.", true);
+    }
+  }
+
+  function endDrag() {
+    if (!isDragging || canjeado) return;
+    isDragging = false;
+    sliderHandle.style.transition = "transform 0.25s ease-out";
+    sliderHandle.style.transform = "translateX(0px)";
+  }
+
+  sliderHandle.addEventListener("mousedown", startDrag);
+  window.addEventListener("mousemove", onDrag);
+  window.addEventListener("mouseup", endDrag);
+
+  sliderHandle.addEventListener("touchstart", startDrag, { passive: true });
+  window.addEventListener("touchmove", onDrag, { passive: true });
+  window.addEventListener("touchend", endDrag);
+
+  // Panel Secreto (5 toques)
+  let toques = 0;
+  let timerToques;
+  document.getElementById("adminTrigger").addEventListener("click", () => {
+    toques++;
+    clearTimeout(timerToques);
+    timerToques = setTimeout(() => { toques = 0; }, 1500);
+    if (toques >= 5) {
+      toques = 0;
+      const clave = prompt("Introduce el PIN de Administrador:");
+      if (clave === PIN_ADMIN) {
+        document.getElementById("adminModal").style.display = "flex";
+      } else if (clave !== null) {
+        mostrarAviso("❌ PIN de administrador incorrecto");
+      }
+    }
+  });
+
+  function activarPremioForzado() {
+    // Limpia el bloqueo local para que la administradora siempre pueda tirar
+    localStorage.removeItem("ultima_tirada_feria");
+    localStorage.setItem("admin_forzar_premio", "true");
+    spinBtn.style.display = "block";
+    spinBtn.disabled = false;
+    spinBtn.textContent = "¡PROBAR SUERTE!";
+    premioBox.style.display = "none";
+    bannerAviso.style.display = "none";
+    mostrarAviso("🎁 ¡Premio forzado listo para la siguiente tirada!", true);
+    cerrarAdmin();
+  }
+
+  function cerrarAdmin() {
+    document.getElementById("adminModal").style.display = "none";
+  }
+</script>
 </body>
 </html> 
