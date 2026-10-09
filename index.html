@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta Viernes de Feria</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      text-align: center;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 6px; color: #f5af19; }
+    p.sub { font-size: 0.95rem; opacity: 0.85; margin-bottom: 18px; }
+
+    .ruleta-box {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin: 0 auto 20px auto;
+    }
+    .indicador {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 24px solid #ff2e63;
+      z-index: 10;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 10px rgba(245, 175, 25, 0.3);
+      transition: transform 4s cubic-bezier(0.15, 0.9, 0.2, 1);
+    }
+    button.btn-girar {
+      background: linear-gradient(45deg, #f5af19, #e17055);
+      border: none;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.15rem;
+      padding: 14px 34px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4);
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    button.btn-girar:active { transform: scale(0.96); }
+    button.btn-girar:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .mensaje {
+      margin-top: 18px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      min-height: 28px;
+      max-width: 340px;
+    }
+    .admin-link {
+      margin-top: 25px;
+      font-size: 0.8rem;
+      color: #666;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎪 VIERNES DE FERIA 🎪</h1>
+  <p class="sub">¡Prueba tu suerte y llévate tu premio!</p>
+
+  <div class="ruleta-box">
+    <div class="indicador"></div>
+    <canvas id="canvasRuleta" width="600" height="600"></canvas>
+  </div>
+
+  <button id="btnGirar" class="btn-girar" onclick="tirar()">GIRAR RULETA</button>
+
+  <div id="mensaje" class="mensaje"></div>
+  <div class="admin-link" onclick="solicitarAdmin()">Acceso barra</div>
+
+  <script>
+    // ================= CONFIGURACIÓN =================
+    const PIN_ADMIN = "2024"; 
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzVWPfeAikKEhbmrFKHZ6M82F7VLkW6jvtQe9vuVL_cMNemcoIWkqIqBHhM0tJHttUc/exec";
+    // =================================================
+
+    let esModoAdmin = false;
+    let girando = false;
+    let rotacionActual = 0;
+
+    // 8 sectores (45° por casilla)
+    const sectores = [
+      { type: "chupito", label: "Chupito", color: "#e67e22" },
+      { type: "nada", label: "Suerte", color: "#34495e" },
+      { type: "dto_rebujito", label: "-1.50€ Rebuj.", color: "#16a085" },
+      { type: "cubata_gratis", label: "Cubata Gratis", color: "#9b59b6" },
+      { type: "nada", label: "Suerte", color: "#2c3e50" },
+      { type: "dto_cubata", label: "-2.00€ Cubata", color: "#2980b9" },
+      { type: "chupito", label: "Chupito", color: "#d35400" },
+      { type: "nada", label: "Suerte", color: "#34495e" }
+    ];
+
+    const canvas = document.getElementById("canvasRuleta");
+    const ctx = canvas.getContext("2d");
+    const numSectores = sectores.length;
+    const anguloPorSector = (2 * Math.PI) / numSectores;
+
+    function dibujarRuleta() {
+      const centro = canvas.width / 2;
+      const radio = centro - 10;
+
+      for (let i = 0; i < numSectores; i++) {
+        const anguloInicio = i * anguloPorSector;
+        const anguloFin = anguloInicio + anguloPorSector;
+
+        ctx.beginPath();
+        ctx.fillStyle = sectores[i].color;
+        ctx.moveTo(centro, centro);
+        ctx.arc(centro, centro, radio, anguloInicio, anguloFin);
+        ctx.lineTo(centro, centro);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(centro, centro);
+        ctx.rotate(anguloInicio + anguloPorSector / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 26px sans-serif";
+        ctx.fillText(sectores[i].label, radio - 20, 10);
+        ctx.restore();
+      }
+    }
+    dibujarRuleta();
+
+    // Bloqueo local en el navegador
+    if (localStorage.getItem("feria_jugado_viernes") === "true") {
+      document.getElementById("btnGirar").disabled = true;
+      document.getElementById("mensaje").innerHTML = "Ya has participado hoy en el Viernes de Feria 🎪";
+    }
+
+    function solicitarAdmin() {
+      const pin = prompt("Introduce el PIN de acceso:");
+      if (pin === PIN_ADMIN) {
+        esModoAdmin = true;
+        alert("Modo barra activado para la próxima tirada.");
+      } else if (pin !== null) {
+        alert("PIN incorrecto.");
+      }
+    }
+
+    async function tirar() {
+      if (girando) return;
+
+      const btn = document.getElementById("btnGirar");
+      const msg = document.getElementById("mensaje");
+      btn.disabled = true;
+      msg.innerHTML = "Consultando tirada...";
+
+      let ipUsuario = "Desconocida";
+      try {
+        const resIp = await fetch("https://api.ipify.org?format=json");
+        const dataIp = await resIp.json();
+        ipUsuario = dataIp.ip;
+      } catch (e) {}
+
+      try {
+        const res = await fetch(`${URL_SCRIPT}?ip=${encodeURIComponent(ipUsuario)}&admin=${esModoAdmin}`);
+        const data = await res.json();
+
+        if (data.status === "CADUCADO" || data.status === "BLOQUEADO") {
+          msg.innerHTML = data.mensaje;
+          return;
+        }
+
+        if (data.status !== "OK") {
+          msg.innerHTML = "Ha ocurrido un error. Inténtalo de nuevo.";
+          btn.disabled = false;
+          return;
+        }
+
+        girando = true;
+        msg.innerHTML = "¡Girando!";
+
+        // Buscar sectores que coincidan con el resultado del servidor
+        let indicesValidos = [];
+        sectores.forEach((sec, idx) => {
+          if (sec.type === data.targetType) indicesValidos.push(idx);
+        });
+
+        if (indicesValidos.length === 0) indicesValidos = [1];
+        const indiceElegido = indicesValidos[Math.floor(Math.random() * indicesValidos.length)];
+
+        // Alineación con la flecha superior (270°)
+        const degPorSector = 360 / numSectores;
+        const anguloCentro = (indiceElegido * degPorSector) + (degPorSector / 2);
+        const anguloDestino = (270 - anguloCentro + 360) % 360;
+
+        // Vueltas completas
+        const vueltas = 360 * 5;
+        const offsetActual = rotacionActual % 360;
+        let diff = (anguloDestino - offsetActual);
+        if (diff < 0) diff += 360;
+
+        rotacionActual += vueltas + diff;
+        canvas.style.transform = `rotate(${rotacionActual}deg)`;
+
+        setTimeout(() => {
+          girando = false;
+          if (data.targetType === "nada") {
+            msg.innerHTML = "¡Vaya! Esta vez no ha habido suerte 🍀";
+          } else {
+            msg.innerHTML = `🎉 ¡PREMIO! <strong>${data.nombrePremio}</strong>`;
+          }
+
+          if (!esModoAdmin) {
+            localStorage.setItem("feria_jugado_viernes", "true");
+          } else {
+            esModoAdmin = false;
+            btn.disabled = false;
+          }
+        }, 4000);
+
+      } catch (err) {
+        msg.innerHTML = "Error de conexión con la caseta.";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html> 
